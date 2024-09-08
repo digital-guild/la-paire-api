@@ -114,7 +114,11 @@ export class ProductService {
         slug,
       },
       include: {
-        product_medias: true,
+        product_medias: {
+          orderBy: [
+            { path: 'asc' }
+          ]
+        },
         product_variants: true
       }
     });
