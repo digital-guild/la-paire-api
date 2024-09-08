@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model brands {
+  id         String     @id @default(cuid())
+  name       String
+  slug       String     @unique
+  logo       String?
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  deleted_at DateTime?
+  products   products[]
+}
+
+model products {
+  id               String             @id @default(cuid())
+  name             String
+  slug             String             @unique
+  price            Float
+  stars            Int
+  comments         Int
+  description      String             @db.Text
+  brand_id         String
+  brand            brands             @relation(fields: [brand_id], references: [id])
+  created_at       DateTime           @default(now())
+  updated_at       DateTime           @updatedAt
+  deleted_at       DateTime?
+  product_medias   product_medias[]
+  product_variants product_variants[]
+}
+
+model product_medias {
+  id         String    @id @default(cuid())
+  product_id String
+  product    products  @relation(fields: [product_id], references: [id])
+  path       String
+  type       MediaType
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+}
+
+model product_variants {
+  id               String             @id @default(cuid())
+  product_id       String
+  product          products           @relation(fields: [product_id], references: [id])
+  size             Int
+  created_at       DateTime           @default(now())
+  updated_at       DateTime           @updatedAt
+  deleted_at       DateTime?
+  ordered_products ordered_products[]
+}
+
+model orders {
+  id               String             @id @default(cuid())
+  fullname         String
+  email            String?
+  contact          String
+  delivery_place   String
+  subtotal         Float
+  fee              Float
+  total            Float
+  created_at       DateTime           @default(now())
+  updated_at       DateTime           @updatedAt
+  deleted_at       DateTime?
+  ordered_products ordered_products[]
+}
+
+model ordered_products {
+  id         String           @id @default(cuid())
+  order_id   String
+  order      orders           @relation(fields: [order_id], references: [id])
+  product_id String
+  product    product_variants @relation(fields: [product_id], references: [id])
+  quantity   Int
+  created_at DateTime         @default(now())
+  updated_at DateTime         @updatedAt
+  deleted_at DateTime?
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
